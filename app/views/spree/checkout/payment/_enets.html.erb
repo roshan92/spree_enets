@@ -1,6 +1,6 @@
 Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_proceed_url(pid: payment_method.id), class: 'link_nets_btn') %>
 
-<input type="button" value="Send Payload" onclick="Enets.checkOut()" style="font-size : 15px;">
+<input type="button" value="Send Payload" onclick="checkOut()" style="font-size : 15px;">
 
 <div class="payment-section">
   <fieldset>
@@ -24,6 +24,12 @@ Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_
 </style>
 
 <script>
+  function checkOut() {
+    sendPayLoad(<%= @txn_req %>, <%= @hmac %>, <%= @key_id %>);
+  };
+</script>
+
+<script>
   Enets = {
       updateSaveAndContinueVisibility: function() {
         if (this.isButtonHidden()) {
@@ -44,14 +50,6 @@ Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_
       },
       showSaveAndContinue: function() {
         $("#checkout_form_payment [data-hook=buttons]").show();
-      },
-      checkOut: function(txn_req, hmac, key_id) {
-        console.log("txn_req" + <%= @txn_req %>);
-        console.log("hmac" + <%= @hmac %>);
-        console.log("key_id" + <%= @key_id %>);
-        console.log("--------------");
-
-        sendPayLoad(<%= @txn_req %>, <%= @hmac %>, <%= @key_id %>);
       }
     }
 

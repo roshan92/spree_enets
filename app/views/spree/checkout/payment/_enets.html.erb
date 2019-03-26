@@ -1,4 +1,4 @@
-Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_pay_path(pid: payment_method.id), method: :post, class: 'link_nets_btn') %>
+Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_pay_path(pid: payment_method.id), remote: true, method: :post, class: 'link_nets_btn', id: 'pay_enets') %>
 
 <div class="payment-section">
   <fieldset>

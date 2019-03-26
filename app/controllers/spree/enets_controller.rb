@@ -53,6 +53,7 @@ module Spree
         error_msg = response['stageRespCode'] + ': ' + response['netsTxnMsg']
 
         render plain: error_msg
+        return
       end
 
       money = @order.total * 100

@@ -27,9 +27,9 @@ module Spree
           @key_id = payment_method.preferred_public_key
           # @payment = @order.payments.create!(amount: @order.total, payment_method: payment_method)
           # @payment.started_processing!
-          if !@txn_req.nil? && !@hmac.nil? && !@key_id.nil?
-            redirect_to :back
-          end
+          # if !@txn_req.nil? && !@hmac.nil? && !@key_id.nil?
+          #   redirect_to indes
+          # end
         end
     end
 

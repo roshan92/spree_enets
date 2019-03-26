@@ -1,0 +1,30 @@
+<div class="payment-section">
+  <fieldset>
+      <div id="ajaxResponse"></div>
+  </fieldset>
+</div>
+
+<div class="center jumbotron">
+  <h1>eNETS Payment Gateway</h1>
+
+  <form class="input-form">
+    <div class="a">Transaction Request:</div> <%= text_area_tag(:txn_req, @txn_req, size: "100x6") %>
+    <div class="a">HMAC:</div>  <%= text_area_tag(:hmac, @hmac, size: "100x1") %>
+    <div class="a">Key ID:</div> <%= text_area_tag(:key_id, @key_id, size: "100x1") %>
+    <br>
+    <br>
+    <input type="button" value="Send Payload" onclick="checkOut()" style="font-size : 15px;">
+  </form>
+
+</div>
+<div class="payment-section">
+  <fieldset>
+      <div id="ajaxResponse"></div>
+  </fieldset>
+</div>
+<script>
+  function checkOut() {
+  	// window.alert(txn_req.value);
+    sendPayLoad(txn_req.value, hmac.value, key_id.value);
+  };
+</script>

@@ -1,12 +1,4 @@
-Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_proceed_url(pid: payment_method.id), class: 'link_nets_btn') %>
-
-<input type="button" value="Send Payload" onclick="checkOut()" style="font-size : 15px;">
-
-<div class="payment-section">
-  <fieldset>
-      <div id="ajaxResponse"></div>
-  </fieldset>
-</div>
+Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_proceed_url(pid: payment_method.id), method: :post, class: 'link_nets_btn') %>
 
 <style>
   .nets_btn{
@@ -23,11 +15,6 @@ Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_
   }
 </style>
 
-<script>
-  function checkOut() {
-    sendPayLoad(<%= @txn_req %>, <%= @hmac %>, <%= @key_id %>);
-  };
-</script>
 
 <script>
   Enets = {

@@ -75,9 +75,31 @@ module Spree
       merchantTxnRef = time.inspect[0..-7].tr('-','').tr(':','') + time.usec.to_s[0..-4]
       merchantTxnDtm = time.inspect[0..-7].tr('-','') + "." + time.usec.to_s[0..-4]
 
-      txn_req = "{\"ss\":\"1\",\"msg\":{\"netsMid\":\""+umid+"\",\"tid\":\"\",\"submissionMode\":\"B\",\"txnAmount\":\""+txnAmt+"\",\"merchantTxnRef\":\""+merchantTxnRef+"\",\"merchantTxnDtm\":\""+merchantTxnDtm+"\",\"paymentType\":\"SALE\",\"currencyCode\":\"SGD\",\"paymentMode\":\"\",\"merchantTimeZone\":\"+8:00\",\"b2sTxnEndURL\":\"https://httpbin.org/post\",\"b2sTxnEndURLParam\":\"\",\"s2sTxnEndURL\":\"https://sit2.enets.sg/MerchantApp/rest/s2sTxnEnd\",\"s2sTxnEndURLParam\":\"\",\"clientType\":\"H\",\"supMsg\":\"\",\"netsMidIndicator\":\"U\",\"ipAddress\":\"127.0.0.1\",\"language\":\"en\"}}"
+      txn_req = {
+            ss: "1", msg: {
+              netsMid: umid,
+              tid:"",
+              submissionMode: "B",
+              txnAmount: txnAmt,
+              merchantTxnRef: merchantTxnRef,
+              merchantTxnDtm: merchantTxnDtm,
+              paymentType: "SALE",
+              currencyCode: "SGD",
+              paymentMode: "",
+              merchantTimeZone: "+8:00",
+              b2sTxnEndURL: "https://httpbin.org/post",
+              b2sTxnEndURLParam: "",
+              s2sTxnEndURL: "https://sit2.enets.sg/MerchantApp/rest/s2sTxnEnd",
+              s2sTxnEndURLParam: "",
+              clientType: "H",
+              supMsg:"",
+              netsMidIndicator: "U",
+              ipAddress: "127.0.0.1",
+              language: "en"
+            }
+          }
 
-      return txn_req
+      return txn_req.to_s
     end
 
     def generate_signature(txn_req, secret_key)

@@ -34,12 +34,12 @@ module Spree
         key_id = params[:KeyId]
       end
 
-      raise send_error("UMID mismatch") if response[:netsMid] != payment_method.preferred_umid
-      raise send_error("invalid payment method") if payment_method.type != "Spree::Gateway::Enets"
+      raise "UMID mismatch" if response[:netsMid] != payment_method.preferred_umid
+      raise "Invalid Payment method" if payment_method.type != "Spree::Gateway::Enets"
 
       Spree::LogEntry.create({
-          source: payment_method,
-          details: params.to_yaml
+        source: payment_method,
+        details: params.to_yaml
       })
 
       # if hmac != @hmac
@@ -47,6 +47,13 @@ module Spree
       #   return
       # end
       # order = Spree::Order.find_by(number: response[:orderid])
+
+      # netsTxnStatus= 0 is successfully transaction. 1 is failed.
+      if response['msg']['netsTxnStatus'] == '1'
+        error_msg = response['msg']['stageRespCode'] + ': ' + parsed_response['msg']['netsTxnMsg']
+
+        render plain: error_msg
+      end
 
       money = @order.total * 100
       if response[:netsAmountDeducted].to_i >= money.to_i
@@ -90,7 +97,7 @@ module Spree
     end
 
     def confirm
-      raise send_error("invalid payment method") if payment_method.type != "Spree::Gateway::Enets"
+      raise "Invalid Payment method" if payment_method.type != "Spree::Gateway::Enets"
 
       if params[:data].nil?
         begin
@@ -103,7 +110,7 @@ module Spree
         key_id = params[:KeyId]
       end
 
-      raise send_error("UMID mismatch") if response[:netsMid] != payment_method.preferred_umid
+      raise "UMID mismatch" if response[:netsMid] != payment_method.preferred_umid
 
       if @order.payment_state != "paid"
         flash.alert = Spree.t(:payment_processing_failed)

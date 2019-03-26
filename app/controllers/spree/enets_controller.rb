@@ -1,31 +1,34 @@
+require 'Base64'
+require 'openssl'
+
 module Spree
   class EnetsController < StoreController
     before_action :load_order
-    before_action :setup_paymaya, only: :pay
-    before_action :verify_paymaya, only: :success
+    before_action :payment_method, only: [:pay]
     before_action :load_payment, only: %i[success cancel failure]
 
     def pay
-      @payment = @order.payments
-                       .create!(amount: @order.total, payment_method: payment_method)
-      @payment.started_processing!
+      txn_amt = @order.total
+      if (!txn_amt.nil?)
+        if (!txn_amt.empty?)
+          txn_req = generate_payload(txn_amt, payment_method.preferred_umid)
+          hmac = generate_signature(txn_req, payment_method.preferred_secret_key)
+          key_id = payment_method.preferred_public_key
 
-      callback_urls = {
-        success: paymaya_success_url(id: encrypted_paymaya_id, pid: @payment.number),
-        failure: paymaya_failure_url(id: encrypted_paymaya_id, pid: @payment.number),
-        cancel: paymaya_cancel_url(id: encrypted_paymaya_id, pid: @payment.number)
-      }
+          # @payment = @order.payments.create!(amount: @order.total, payment_method: payment_method)
+          # @payment.started_processing!
 
-      valid_checkout = @order.to_paymaya.merge(redirect_url: callback_urls)
+          respond_to do |format|
+            format.js { render js: "sendPayLoad(#{txn_req}, #{hmac}, #{key_id});" }
+          end
+        end
+      end
 
-      checkout = Paymaya::Checkout::Checkout.create valid_checkout
-
-      redirect_to(checkout[:redirect_url]) && return
     rescue Exception => e
       Rails.logger.error e.message
       @payment.failure!
 
-      flash[:error] = Spree.t(:paymaya_invalid)
+      flash[:error] = Spree.t(:enets_invalid)
       redirect_to(:back) && return
     end
 
@@ -55,10 +58,6 @@ module Spree
       redirect_to checkout_state_path(@order.state)
     end
 
-    def setup_paymaya
-      payment_method.setup
-    end
-
     private
 
     def load_order
@@ -69,21 +68,25 @@ module Spree
       @payment = Spree::Payment.find_by(number: params['pid']) || raise(ActiveRecord::RecordNotFound)
     end
 
-    def encrypted_paymaya_id
-      secret = Rails.application.secrets.secret_key_base
-      Rails.application.message_verifier(secret).generate(@order.number)
-    end
-
     def payment_method
-      PaymentMethod.find(params[:pid])
+      Spree::PaymentMethod.find(params[:pid])
     end
 
-    def verify_paymaya
-      Rails.application.message_verifier(
-        Rails.application.secrets.secret_key_base
-      ).verify(params[:id])
-    rescue StandardError
-      redirect_to checkout_state_path(@order.state)
+    def generate_payload(txnAmt, umid)
+      time = Time.new
+      merchantTxnRef = time.inspect[0..-7].tr('-','').tr(':','') + time.usec.to_s[0..-4]
+      merchantTxnDtm = time.inspect[0..-7].tr('-','') + "." + time.usec.to_s[0..-4]
+
+      txn_req = "{\"ss\":\"1\",\"msg\":{\"netsMid\":\""+umid+"\",\"tid\":\"\",\"submissionMode\":\"B\",\"txnAmount\":\""+txnAmt+"\",\"merchantTxnRef\":\""+merchantTxnRef+"\",\"merchantTxnDtm\":\""+merchantTxnDtm+"\",\"paymentType\":\"SALE\",\"currencyCode\":\"SGD\",\"paymentMode\":\"\",\"merchantTimeZone\":\"+8:00\",\"b2sTxnEndURL\":\"https://httpbin.org/post\",\"b2sTxnEndURLParam\":\"\",\"s2sTxnEndURL\":\"https://sit2.enets.sg/MerchantApp/rest/s2sTxnEnd\",\"s2sTxnEndURLParam\":\"\",\"clientType\":\"H\",\"supMsg\":\"\",\"netsMidIndicator\":\"U\",\"ipAddress\":\"127.0.0.1\",\"language\":\"en\"}}"
+
+      return txn_req
+    end
+
+    def generate_signature(txn_req, secret_key)
+      concat_txn_req_secret_key = txn_req+secret_key
+      hash = Digest::SHA256.digest(concat_txn_req_secret_key.encode('utf-8'))
+      encoded = Base64.encode64(hash)
+      return encoded.to_s
     end
   end
 end

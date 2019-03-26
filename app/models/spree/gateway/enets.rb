@@ -1,9 +1,14 @@
 module Spree
   class Gateway::Enets < Gateway
 
-    preference :mode, :string, default: :sandbox
-    preference :checkout_public_key, :string
-    preference :checkout_secret_key, :string
+    preference :umid, :string
+    preference :public_key, :string
+    preference :secret_key, :string
+    preference :image_url, :string, default: 'https://epayments.developer-ingenico.com/global/images/content/payment-products/enets/enets-logo.jpg'
+
+    def provider_class
+      Enets
+    end
 
     def method_type
       'enets'
@@ -31,13 +36,6 @@ module Spree
 
     def payment_profiles_supported?
       false
-    end
-
-    def setup
-      Enets.config.mode = preferred_mode.to_sym
-      Enets.config.checkout_public_key = preferred_checkout_public_key
-      Enets.config.checkout_secret_key = preferred_checkout_secret_key
-      Enets
     end
   end
 end

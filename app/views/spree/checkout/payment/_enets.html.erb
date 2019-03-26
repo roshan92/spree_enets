@@ -1,35 +1,40 @@
-<%= image_tag "https://paymaya.com/business/assets/img/paymaya-checkout.png" %>
+Pay with <%= link_to(image_tag(payment_method.preferred_image_url), enets_pay_path(pid: payment_method.id), method: :post, class: "btn btn-success") %>
 
-<p>
-  Pay securely using your VISA and MasterCard credit, debit, or prepaid card.
-</p>
-
-<p>
-  After completing the
-  payment form you'll be back to the store.
-</p>
-
-<div class="text-right">
-  <%= link_to enets_pay_path(pid: payment_method.id), method: :post, class: "btn btn-lg btn-success primary" do %>
-    <i class="glyphicon glyphicon-credit-card"></i> Pay with eNETS
-  <% end %>
+<div class="payment-section">
+  <fieldset>
+      <div id="ajaxResponse"></div>
+  </fieldset>
 </div>
 
-<script type="text/javascript">
-$(function() {
-  var spreePaymentRadio = $("#checkout_form_payment input:radio")
-  var hideCheckoutButtonForEnets = function() {
-    if ($("#checkout_form_payment input:radio:checked").val() == <%= payment_method.id %>) {
-      $("#checkout_form_payment .form-buttons").hide();
-      $("p[data-hook='coupon_code']").hide();
-    } else {
-      $("#checkout_form_payment .form-buttons").show();
-      $("p[data-hook='coupon_code']").show();
+<script>
+  Paysera = {
+      updateSaveAndContinueVisibility: function() {
+        if (this.isButtonHidden()) {
+          $(this).trigger('hideSaveAndContinue')
+        } else {
+          $(this).trigger('showSaveAndContinue')
+        }
+      },
+      isButtonHidden: function () {
+        paymentMethod = this.checkedPaymentMethod();
+        return (!$('#use_existing_card_yes:checked').length && Paysera.paymentMethodID && paymentMethod.val() == Paysera.paymentMethodID);
+      },
+      checkedPaymentMethod: function() {
+        return $('div[data-hook="checkout_payment_step"] input[type="radio"][name="order[payments_attributes][][payment_method_id]"]:checked');
+      },
+      hideSaveAndContinue: function() {
+        $("#checkout_form_payment [data-hook=buttons]").hide();
+      },
+      showSaveAndContinue: function() {
+        $("#checkout_form_payment [data-hook=buttons]").show();
+      }
     }
-  }
-  spreePaymentRadio.change(function() {
-    hideCheckoutButtonForEnets();
-  });
-  hideCheckoutButtonForEnets();
-});
+
+    $(document).ready(function() {
+      Paysera.updateSaveAndContinueVisibility();
+      paymentMethods = $('div[data-hook="checkout_payment_step"] input[type="radio"]').click(function (e) {
+        Paysera.updateSaveAndContinueVisibility();
+      });
+    })
+    Paysera.paymentMethodID = "<%= payment_method.id %>"
 </script>

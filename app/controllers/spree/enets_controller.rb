@@ -29,7 +29,7 @@ module Spree
         end
         return
       else
-        response = JSON.parse(CGI.unescape(params[:message][:msg]))
+        response = JSON.parse(CGI.unescape(params[:message]))['msg']
         hmac = params[:hmac]
         key_id = params[:KeyId]
       end
@@ -105,7 +105,7 @@ module Spree
         end
         return
       else
-        response = JSON.parse(CGI.unescape(params[:message][:msg]))
+        response = JSON.parse(CGI.unescape(params[:message]))['msg']
         hmac = params[:hmac]
         key_id = params[:KeyId]
       end

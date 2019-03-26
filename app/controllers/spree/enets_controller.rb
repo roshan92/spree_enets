@@ -10,17 +10,15 @@ module Spree
     def pay
       txn_amt = @order.total
       if (!txn_amt.nil?)
-        if (!txn_amt.empty?)
-          txn_req = generate_payload(txn_amt, payment_method.preferred_umid)
-          hmac = generate_signature(txn_req, payment_method.preferred_secret_key)
-          key_id = payment_method.preferred_public_key
+        txn_req = generate_payload(txn_amt, payment_method.preferred_umid)
+        hmac = generate_signature(txn_req, payment_method.preferred_secret_key)
+        key_id = payment_method.preferred_public_key
 
-          # @payment = @order.payments.create!(amount: @order.total, payment_method: payment_method)
-          # @payment.started_processing!
+        # @payment = @order.payments.create!(amount: @order.total, payment_method: payment_method)
+        # @payment.started_processing!
 
-          respond_to do |format|
-            format.js { render js: "sendPayLoad(#{txn_req}, #{hmac}, #{key_id});" }
-          end
+        respond_to do |format|
+          format.js { render js: "sendPayLoad(#{txn_req}, #{hmac}, #{key_id});" }
         end
       end
 

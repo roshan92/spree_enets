@@ -1,35 +1,12 @@
-Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_proceed_url(pid: payment_method.id), method: :post, onclick: "Enets.checkOutx(#{@txn_req}, #{@hmac}, #{@key_id})", class: 'link_nets_btn') %>
+Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_proceed_url(pid: payment_method.id), class: 'link_nets_btn') %>
 
+<input type="button" value="Send Payload" onclick="Enets.checkOut()" style="font-size : 15px;">
 
 <div class="payment-section">
   <fieldset>
       <div id="ajaxResponse"></div>
   </fieldset>
 </div>
-
-<form class="input-form">
-  <span class="a">Transaction Amount:   <input class="input" id="txnAmt" type="decimal" name="txnAmt" placeholder=""></span>
-  <br><br>
-  <input type="submit" value="Generate Payload">
-  <br>
-  <br>
-  <div class="a">Transaction Request:</div> <%= text_area_tag(:txn_req, @txn_req, size: "100x6") %>
-  <div class="a">HMAC:</div>  <%= text_area_tag(:hmac, @hmac, size: "100x1") %>
-  <div class="a">Key ID:</div> <%= text_area_tag(:keyID, @key_id, size: "100x1") %>
-  <br>
-  <br>
-  <input type="button" value="Send Payload" onclick="checkOut()" style="font-size : 15px;">
-</form>
-
-<script>
-function checkOut() {
-  // window.alert(txn_req.value);
-  console.log(txn_req.value);
-  console.log(hmac.value);
-  console.log(keyID.value);
-  sendPayLoad(txn_req.value, hmac.value, keyID.value);
-};
-</script>
 
 <style>
   .nets_btn{
@@ -68,13 +45,13 @@ function checkOut() {
       showSaveAndContinue: function() {
         $("#checkout_form_payment [data-hook=buttons]").show();
       },
-      checkOutx: function(txn_req, hmac, key_id) {
-        console.log("txn_req" + txn_req);
-        console.log("hmac" + hmac);
-        console.log("key_id" + key_id);
+      checkOut: function(txn_req, hmac, key_id) {
+        console.log("txn_req" + <%= @txn_req %>);
+        console.log("hmac" + <%= @hmac %>);
+        console.log("key_id" + <%= @key_id %>);
         console.log("--------------");
 
-        sendPayLoad(txn_req, hmac, key_id);
+        sendPayLoad(<%= @txn_req %>, <%= @hmac %>, <%= @key_id %>);
       }
     }
 

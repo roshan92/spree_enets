@@ -25,16 +25,9 @@ module Spree
           @txn_req = generate_payload(txn_amt, payment_method.preferred_umid)
           @hmac = generate_signature(@txn_req, payment_method.preferred_secret_key)
           @key_id = payment_method.preferred_public_key
-
-          render 'index'
-
           # @payment = @order.payments.create!(amount: @order.total, payment_method: payment_method)
           # @payment.started_processing!
         end
-
-        # begin
-        #   redirect_to url
-        # end
     end
 
     def callback

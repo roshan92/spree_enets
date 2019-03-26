@@ -1,4 +1,4 @@
-Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_pay_path(pid: payment_method.id), remote: true, method: :post, class: 'link_nets_btn', id: 'pay_enets') %>
+Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_pay_path(pid: payment_method.id), method: :post, onclick: "Enets.checkOut(#{@txn_req}, #{@hmac}, #{@key_id})", class: 'link_nets_btn') %>
 
 <div class="payment-section">
   <fieldset>
@@ -42,6 +42,9 @@ Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_
       },
       showSaveAndContinue: function() {
         $("#checkout_form_payment [data-hook=buttons]").show();
+      },
+      checkOut: function(txn_req, hmac, key_id) {
+        sendPayLoad(txn_req, hmac, key_id);
       }
     }
 

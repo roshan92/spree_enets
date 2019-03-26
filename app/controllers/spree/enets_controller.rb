@@ -16,10 +16,6 @@ module Spree
 
         # @payment = @order.payments.create!(amount: @order.total, payment_method: payment_method)
         # @payment.started_processing!
-
-        respond_to do |format|
-          format.js
-        end
       end
 
     rescue Exception => e

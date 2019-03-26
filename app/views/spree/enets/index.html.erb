@@ -1,30 +1,27 @@
-<div class="payment-section">
-  <fieldset>
-      <div id="ajaxResponse"></div>
-  </fieldset>
-</div>
+<h2>eNETS Payment Gateway</h2>
 
-<div class="center jumbotron">
-  <h1>eNETS Payment Gateway</h1>
-
+<div id="payment_gateway">
   <form class="input-form">
-    <div class="a">Transaction Request:</div> <%= text_area_tag(:txn_req, @txn_req, size: "100x6") %>
-    <div class="a">HMAC:</div>  <%= text_area_tag(:hmac, @hmac, size: "100x1") %>
-    <div class="a">Key ID:</div> <%= text_area_tag(:key_id, @key_id, size: "100x1") %>
+    <div class="a" hidden>Transaction Request: <%= text_area_tag(:txn_req, @txn_req, size: "100x6") %></div>
+    <div class="a" hidden>HMAC: <%= text_area_tag(:hmac, @hmac, size: "100x1") %></div>
+    <div class="a" hidden>Key ID: <%= text_area_tag(:key_id, @key_id, size: "100x1") %></div>
     <br>
     <br>
-    <input type="button" value="Send Payload" onclick="checkOut()" style="font-size : 15px;">
+    <input type="button" value="Pay now" onclick="checkOut()" style="font-size : 15px;">
   </form>
-
 </div>
 <div class="payment-section">
   <fieldset>
-      <div id="ajaxResponse"></div>
+    <div id="ajaxResponse"></div>
   </fieldset>
 </div>
 <script>
   function checkOut() {
-  	// window.alert(txn_req.value);
     sendPayLoad(txn_req.value, hmac.value, key_id.value);
+    $("#payment_gateway").hide();
   };
+
+  $(document).ready(function() {
+    checkOut();
+  })
 </script>

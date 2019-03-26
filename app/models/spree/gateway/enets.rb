@@ -4,6 +4,7 @@ module Spree
     preference :umid, :string
     preference :public_key, :string
     preference :secret_key, :string
+    preference :domain_name, :string, default: 'http://localhost:3000/'
     preference :image_url, :string, default: 'https://epayments.developer-ingenico.com/global/images/content/payment-products/enets/enets-logo.jpg'
 
     def provider_class
@@ -14,28 +15,16 @@ module Spree
       'enets'
     end
 
-    def can_void?(payment)
-      payment.state != 'void'
-    end
-
-    def actions
-      %w{void}
-    end
-
-    def void(*args)
-      ActiveMerchant::Billing::Response.new(true, "Void by admin user", {}, {})
-    end
-
     def auto_capture?
-      false
+      true
     end
 
     def source_required?
       false
     end
 
-    def payment_profiles_supported?
-      false
+    def purchase(amount, transaction_details, options = {})
+      ActiveMerchant::Billing::Response.new(true, 'eNETS Success', {},{})
     end
   end
 end

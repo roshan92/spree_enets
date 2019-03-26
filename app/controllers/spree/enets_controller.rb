@@ -29,12 +29,12 @@ module Spree
         end
         return
       else
-        response = JSON.parse(CGI.unescape(params[:message]))
+        response = JSON.parse(CGI.unescape(params[:message][:msg]))
         hmac = params[:hmac]
         key_id = params[:KeyId]
       end
 
-      raise "UMID mismatch" if response[:netsMid] != payment_method.preferred_umid
+      raise "UMID mismatch" if response['netsMid'] != payment_method.preferred_umid
       raise "Invalid Payment method" if payment_method.type != "Spree::Gateway::Enets"
 
       Spree::LogEntry.create({
@@ -49,15 +49,15 @@ module Spree
       # order = Spree::Order.find_by(number: response[:orderid])
 
       # netsTxnStatus= 0 is successfully transaction. 1 is failed.
-      if response['msg']['netsTxnStatus'] == '1'
-        error_msg = response['msg']['stageRespCode'] + ': ' + parsed_response['msg']['netsTxnMsg']
+      if response['netsTxnStatus'] == '1'
+        error_msg = response['stageRespCode'] + ': ' + response['netsTxnMsg']
 
         render plain: error_msg
       end
 
       money = @order.total * 100
       if response[:netsAmountDeducted].to_i >= money.to_i
-        if response[:payamount].to_i > money.to_i
+        if response[:netsAmountDeducted].to_i > money.to_i
           payment = @order.payments.create!({
               source_type: 'Spree::Gateway::Enets',
               amount: (response[:netsAmountDeducted].to_f/100).round,
@@ -99,13 +99,13 @@ module Spree
     def confirm
       raise "Invalid Payment method" if payment_method.type != "Spree::Gateway::Enets"
 
-      if params[:data].nil?
+      if params[:message].nil?
         begin
         redirect_to products_path
         end
         return
       else
-        response = JSON.parse(CGI.unescape(params[:message]))
+        response = JSON.parse(CGI.unescape(params[:message][:msg]))
         hmac = params[:hmac]
         key_id = params[:KeyId]
       end

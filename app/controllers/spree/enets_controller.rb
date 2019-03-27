@@ -41,8 +41,6 @@ module Spree
         details: params.to_yaml
       })
 
-      test
-
       # netsTxnStatus= 0 is successfully transaction. 1 is failed.
       if response['netsTxnStatus'] == '1'
         error_msg = response['stageRespCode'] + ': ' + response['netsTxnMsg']

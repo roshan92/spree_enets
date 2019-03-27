@@ -51,29 +51,29 @@ module Spree
       end
 
       money = (@order.total.to_f*100).round
-      if response['netsAmountDeducted'].to_i == money.to_i
+      if response['netsAmountDeducted'].to_i == money && response['netsTxnStatus'] == '0' && response['stageRespCode'].split('-').last == '00000'
         payment = @order.payments.create!({
-            source_type: 'Spree::Gateway::Enets',
-            amount: txn_amt,
-            payment_method: payment_method,
-            response_code: response['stageRespCode'],
-            avs_response: response['netsTxnMsg']
+          source_type: 'Spree::Gateway::Enets',
+          amount: response['netsAmountDeducted'].to_f/100,
+          payment_method: payment_method,
+          response_code: response['stageRespCode'],
+          avs_response: response['netsTxnMsg']
         })
 
         payment.complete
         @order.next
 
         if @order.payment_state == "paid"
-          flash.notice = 'Order completed. Payment Successfully!'
-          redirect_to checkout_path
+          flash.notice = payment_method.preferred_success_message
+          redirect_to checkout_state_path(state: 'complete')
           return
         else
-          flash.alert = 'Error processing payment'
+          flash.alert = payment_method.preferred_failed_message
           redirect_to checkout_path
           return
         end
       else
-        flash.alert = 'Error: Bad order amount'
+        flash.alert = payment_method.preferred_error_message
         redirect_to products_path
         return
       end
@@ -89,21 +89,19 @@ module Spree
         return
       else
         response = JSON.parse(CGI.unescape(params[:message]))['msg']
-        hmac = params[:hmac]
-        key_id = params[:KeyId]
       end
 
       raise "UMID mismatch" if response['netsMid'] != payment_method.preferred_umid
 
       if @order.payment_state != "paid"
-        flash.alert = Spree.t(:payment_processing_failed)
+        flash.alert = payment_method.preferred_failed_message
         begin
           redirect_to cart_path
         end
         return
       end
 
-      flash.notice = Spree.t(:order_processed_successfully)
+      flash.notice = payment_method.preferred_success_message
       begin
         redirect_to user_root_path
       end

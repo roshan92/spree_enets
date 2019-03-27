@@ -57,44 +57,24 @@ module Spree
         return
       end
 
-      money = @order.total * 100
-      if response[:netsAmountDeducted].to_i >= money.to_i
-        if response[:netsAmountDeducted].to_i > money.to_i
-          payment = @order.payments.create!({
-              source_type: 'Spree::Gateway::Enets',
-              amount: (response[:netsAmountDeducted].to_f/100).round,
-              payment_method: payment_method
-          })
-          payment.complete
-          @order.next
+      money = (@order.total.to_f*100).round
+      if response[:netsAmountDeducted].to_i == money.to_i
+        payment = @order.payments.create!({
+            source_type: 'Spree::Gateway::Enets',
+            amount: (response[:netsAmountDeducted].to_f/100).round,
+            payment_method: payment_method
+        })
+        payment.complete
+        @order.next
 
-          if @order.payment_state == "paid"
-            flash.notice = 'Payment Successfully. Payment amount is greater than order total.'
-            redirect_to checkout_path
-            return
-          else
-            flash.alert = 'Error processing payment.'
-            redirect_to checkout_path
-            return
-          end
+        if @order.payment_state == "paid"
+          flash.notice = 'Order completed. Payment Successfully!'
+          redirect_to checkout_path
+          return
         else
-          payment = @order.payments.create!({
-              source_type: 'Spree::Gateway::Enets',
-              amount: (response[:netsAmountDeducted].to_f/100).round,
-              payment_method: payment_method
-          })
-          payment.complete
-          @order.next
-
-          if @order.payment_state == "paid"
-            flash.notice = 'Order completed. Payment Successfully!'
-            redirect_to checkout_path
-            return
-          else
-            flash.alert = 'Error processing payment'
-            redirect_to checkout_path
-            return
-          end
+          flash.alert = 'Error processing payment'
+          redirect_to checkout_path
+          return
         end
       else
         flash.alert = 'Error: Bad order amount'

@@ -52,7 +52,8 @@ module Spree
       if response['netsTxnStatus'] == '1'
         error_msg = response['stageRespCode'] + ': ' + response['netsTxnMsg']
 
-        render plain: error_msg
+        flash.alert = error_msg
+        redirect_to checkout_path
         return
       end
 
@@ -68,10 +69,12 @@ module Spree
           @order.next
 
           if @order.payment_state == "paid"
-            render plain: 'OK payment amount is greater than order total'
+            flash.notice = 'Payment Successfully. Payment amount is greater than order total.'
+            redirect_to checkout_path
             return
           else
-            render plain: 'Error processing payment'
+            flash.alert = 'Error processing payment.'
+            redirect_to checkout_path
             return
           end
         else
@@ -84,15 +87,18 @@ module Spree
           @order.next
 
           if @order.payment_state == "paid"
-            render plain: 'Order completed. Payment Successfully!'
+            flash.notice = 'Order completed. Payment Successfully!'
+            redirect_to checkout_path
             return
           else
-            render plain: 'Error processing payment'
+            flash.alert = 'Error processing payment'
+            redirect_to checkout_path
             return
           end
         end
       else
-        render plain: 'Error: Bad order amount'
+        flash.alert = 'Error: Bad order amount'
+        redirect_to products_path
         return
       end
     end
@@ -102,7 +108,7 @@ module Spree
 
       if params[:message].nil?
         begin
-        redirect_to products_path
+          redirect_to products_path
         end
         return
       else
@@ -154,7 +160,7 @@ module Spree
       merchantTxnRef = time.inspect[0..-7].tr('-','').tr(':','') + time.usec.to_s[0..-4]
       merchantTxnDtm = time.inspect[0..-7].tr('-','') + "." + time.usec.to_s[0..-4]
 
-      txn_req = "{\"ss\":\"1\",\"msg\":{\"netsMid\":\""+umid+"\",\"tid\":\"\",\"submissionMode\":\"B\",\"txnAmount\":\""+(txnAmt.to_f*100).round.to_s+"\",\"merchantTxnRef\":\""+merchantTxnRef+"\",\"merchantTxnDtm\":\""+merchantTxnDtm+"\",\"paymentType\":\"SALE\",\"currencyCode\":\"SGD\",\"paymentMode\":\"\",\"merchantTimeZone\":\"+8:00\",\"b2sTxnEndURL\":\""+callback_url+"\",\"b2sTxnEndURLParam\":\"\",\"s2sTxnEndURL\":\"https://sit2.enets.sg/MerchantApp/rest/s2sTxnEnd\",\"s2sTxnEndURLParam\":\"\",\"clientType\":\"W\",\"supMsg\":\"\",\"netsMidIndicator\":\"U\",\"ipAddress\":\"127.0.0.1\",\"language\":\"en\"}}"
+      txn_req = "{\"ss\":\"1\",\"msg\":{\"netsMid\":\""+umid+"\",\"tid\":\"\",\"submissionMode\":\"B\",\"txnAmount\":\""+(txnAmt.to_f*100).round.to_s+"\",\"merchantTxnRef\":\""+merchantTxnRef+"\",\"merchantTxnDtm\":\""+merchantTxnDtm+"\",\"paymentType\":\"SALE\",\"currencyCode\":\"SGD\",\"paymentMode\":\"\",\"merchantTimeZone\":\"+8:00\",\"b2sTxnEndURL\":\""+callback_url+"\",\"b2sTxnEndURLParam\":\"\",\"s2sTxnEndURL\":\"https://sit2.enets.sg/MerchantApp/rest/s2sTxnEnd\",\"s2sTxnEndURLParam\":\"\",\"clientType\":\"W\",\"supMsg\":\"\",\"netsMidIndicator\":\"U\",\"ipAddress\":\""+request.remote_ip+"\",\"language\":\"en\"}}"
 
       return txn_req
     end

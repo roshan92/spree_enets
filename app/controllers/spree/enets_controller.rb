@@ -14,11 +14,18 @@ module Spree
       cancel_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + enets_cancel_path(params[:pid]).gsub("\n",'')
 
       txn_amt = @order.total
-
       if (!txn_amt.nil?)
         @txn_req = generate_payload(txn_amt, payment_method.preferred_umid, callback_url)
         @hmac = generate_signature(@txn_req, payment_method.preferred_secret_key)
         @key_id = payment_method.preferred_public_key
+
+        payment = @order.payments.create!({
+            source_type: 'Spree::Gateway::Enets',
+            amount: txn_amt,
+            payment_method: payment_method,
+            avs_response: @hmac
+        })
+        payment.started_processing
       end
     end
 
@@ -42,11 +49,10 @@ module Spree
         details: params.to_yaml
       })
 
-      # if hmac != @hmac
-      #   render plain: 'Error: Fraud Transaction.'
-      #   return
-      # end
-      # order = Spree::Order.find_by(number: response[:orderid])
+      if @order.payments.where(avs_response: hmac).count == 0
+        render plain: 'Error: Fraud Transaction.'
+        return
+      end
 
       # netsTxnStatus= 0 is successfully transaction. 1 is failed.
       if response['netsTxnStatus'] == '1'
@@ -57,13 +63,11 @@ module Spree
         return
       end
 
+      test
+
       money = (@order.total.to_f*100).round
       if response[:netsAmountDeducted].to_i == money.to_i
-        payment = @order.payments.create!({
-            source_type: 'Spree::Gateway::Enets',
-            amount: (response[:netsAmountDeducted].to_f/100).round,
-            payment_method: payment_method
-        })
+
         payment.complete
         @order.next
 

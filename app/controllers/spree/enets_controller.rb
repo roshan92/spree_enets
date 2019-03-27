@@ -60,6 +60,26 @@ module Spree
           avs_response: response['netsTxnMsg']
         })
 
+        EnetsTransaction.create!(
+          nets_mid: "#{response['netsMid']}",
+          merchant_txn_ref: "#{response['merchantTxnRef']}",
+          merchant_txn_dtm: "#{response['merchantTxnDtm']}",
+          payment_type: "#{response['paymentType']}",
+          currency_code: "#{response['currencyCode']}",
+          nets_txn_ref: "#{response['netsTxnRef']}",
+          payment_mode: "#{response['paymentMode']}",
+          merchant_time_zone: "#{response['merchantTimeZone']}",
+          nets_txn_msg: "#{response['netsTxnMsg']}",
+          nets_amount_deducted: "#{response['netsAmountDeducted']}",
+          stage_resp_code: "#{response['stageRespCode']}",
+          txn_rand: "#{response['txnRand']}",
+          bank_id: "#{response['bankId']}",
+          bank_ref_code: "#{response['bankRefCode']}",
+          mask_pan: "#{response['maskPan']}",
+          bank_auth_id: "#{response['bankAuthId']}",
+          payment_id: payment.id
+        )
+
         payment.complete
         @order.next
 

@@ -60,7 +60,8 @@ module Spree
           avs_response: response['netsTxnMsg']
         })
 
-        payment.enets_transaction.create!(
+        # NOTE: for has_one, use payment.create_enets_transaction!; for has_many, use payment.enets_transactions.create!
+        payment.create_enets_transaction!(
           nets_mid: "#{response['netsMid']}",
           merchant_txn_ref: "#{response['merchantTxnRef']}",
           merchant_txn_dtm: "#{response['merchantTxnDtm']}",

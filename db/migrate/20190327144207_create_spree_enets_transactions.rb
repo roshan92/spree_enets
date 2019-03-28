@@ -1,6 +1,6 @@
-class CreateEnetsTransactions < ActiveRecord::Migration[5.2]
+class CreateSpreeEnetsTransactions < ActiveRecord::Migration[5.2]
   def change
-    create_table :enets_transactions do |t|
+    create_table :spree_enets_transactions do |t|
       t.string :nets_mid
       t.string :merchant_txn_ref
       t.string :merchant_txn_dtm
@@ -17,7 +17,7 @@ class CreateEnetsTransactions < ActiveRecord::Migration[5.2]
       t.string :bank_ref_code
       t.string :mask_pan
       t.string :bank_auth_id
-      t.integer :payment_id
+      t.references :payment
 
       t.timestamps null: false
     end

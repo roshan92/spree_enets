@@ -86,7 +86,7 @@ module Spree
 
         if @order.payment_state == "paid"
           flash.notice = payment_method.preferred_success_message
-          redirect_to checkout_state_path(state: 'complete')
+          redirect_to checkout_path
           return
         else
           flash.alert = payment_method.preferred_failed_message

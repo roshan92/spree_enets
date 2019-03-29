@@ -50,7 +50,7 @@ module Spree
 
       money = (@order.total.to_f*100).round
       if response['netsAmountDeducted'].to_i == money && response['netsTxnStatus'] == '0' && response['stageRespCode'].split('-').last == '00000'
-        @payment = @order.payments.create!({
+        payment = @order.payments.create!({
           source_type: 'Spree::Gateway::Enets',
           amount: response['netsAmountDeducted'].to_f/100,
           payment_method: payment_method,
@@ -59,9 +59,9 @@ module Spree
         })
 
         payment.started_processing!
-        
+
         # NOTE: for has_one, use payment.create_enets_transaction!; for has_many, use payment.enets_transactions.create!
-        @payment.create_enets_transaction!(
+        payment.create_enets_transaction!(
           nets_mid: "#{response['netsMid']}",
           merchant_txn_ref: "#{response['merchantTxnRef']}",
           merchant_txn_dtm: "#{response['merchantTxnDtm']}",
@@ -78,7 +78,7 @@ module Spree
           bank_ref_code: "#{response['bankRefCode']}",
           mask_pan: "#{response['maskPan']}",
           bank_auth_id: "#{response['bankAuthId']}",
-          payment_id: @payment.id
+          payment_id: payment.id
         )
 
         if response['netsTxnStatus'] == '0'
@@ -90,32 +90,13 @@ module Spree
           @error = false
           @redirect_path = order_path(@order)
         else
-<<<<<<< HEAD
           payment.state = "failed"
           payment.save
-=======
-          @payment.state = "failed"
-          @payment.save
->>>>>>> dc819b21a2c0912024c8a14fcab24217124edf38
           @order.update_attributes(payment_state: "failed")
           @error = true
           @message = "There was an error processing your payment"
           @redirect_path = checkout_state_path(@order.state)
         end
-<<<<<<< HEAD
-=======
-
-        # payment.complete
-        # @order.next
-        #
-        # if @order.payment_state == "paid"
-        #   flash.notice = payment_method.preferred_success_message
-        #   redirect_to order_path(@order) and return
-        # else
-        #   flash.alert = payment_method.preferred_failed_message
-        #   redirect_to checkout_state_path(@order.state) and return
-        # end
->>>>>>> dc819b21a2c0912024c8a14fcab24217124edf38
       end
     end
 

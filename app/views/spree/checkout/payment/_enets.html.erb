@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 Pay with <%= link_to (image_tag(payment_method.preferred_image_url, class: 'nets_btn'), enets_proceed_url(pid: payment_method.id), method: :post, class: 'link_nets_btn') %>
-=======
-<%= link_to("Pay with eNETS", enets_proceed_url(pid: payment_method.id), method: :post, id: "enets_button", class: "btn btn-md btn-primary pull-right") %>
->>>>>>> dc819b21a2c0912024c8a14fcab24217124edf38
 
-<% param_prefix = "payment_source[#{payment_method.id}]" %>
-
-<!-- <style>
+<style>
   .nets_btn{
     height: 30px;
     padding-bottom: 5px;
@@ -19,4 +13,4 @@ Pay with <%= link_to (image_tag(payment_method.preferred_image_url, class: 'nets
     font-size: 20px;
     width: 150px;
   }
-</style> -->
+</style>

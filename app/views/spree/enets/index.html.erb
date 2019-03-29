@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <h4>Processing... Do not refresh the page!</h4>
 
 <div id="payment_gateway">
@@ -7,12 +8,24 @@
     <div class="a" hidden>Key ID: <%= text_area_tag(:key_id, @key_id, size: "100x1") %></div>
   </form>
 </div>
+=======
+<h4>Processing ...</h4>
+
+<form id="checkout_form" name="checkout_form" class="input-form">
+  <div class="a" hidden>Transaction Request: <%= text_area_tag(:txn_req, @txn_req, size: "100x6") %></div>
+  <div class="a" hidden>HMAC: <%= text_area_tag(:hmac, @hmac, size: "100x1") %></div>
+  <div class="a" hidden>Key ID: <%= text_area_tag(:key_id, @key_id, size: "100x1") %></div>
+  <br>
+  <br>
+</form>
+
+>>>>>>> dc819b21a2c0912024c8a14fcab24217124edf38
 <div class="payment-section">
   <fieldset>
     <div id="ajaxResponse"></div>
   </fieldset>
 </div>
-<script>
+<!-- <script type="text/javascript">
   function checkOut() {
     sendPayLoad(txn_req.value, hmac.value, key_id.value);
     $("#payment_gateway").hide();
@@ -21,4 +34,10 @@
   $(document).ready(function() {
     checkOut();
   })
+</script> -->
+
+<script type="text/javascript">
+  (function () {
+    sendPayLoad(txn_req.value, hmac.value, key_id.value);
+  })();
 </script>

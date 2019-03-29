@@ -58,8 +58,6 @@ module Spree
           avs_response: response['netsTxnMsg']
         })
 
-        payment.started_processing!
-
         # NOTE: for has_one, use payment.create_enets_transaction!; for has_many, use payment.enets_transactions.create!
         payment.create_enets_transaction!(
           nets_mid: "#{response['netsMid']}",
@@ -81,21 +79,22 @@ module Spree
           payment_id: payment.id
         )
 
-        if response['netsTxnStatus'] == '0'
-          @order.next
+        payment.complete
+        @order.next!
+
+        if @order.complete?
           @message = Spree.t(:order_processed_successfully)
           @current_order = nil
-          flash.notice = Spree.t(:order_processed_successfully)
           flash['order_completed'] = true
           @error = false
-          @redirect_path = order_path(@order)
+          @redirect_path = order_path(payment.order)
         else
           payment.state = "failed"
           payment.save
           @order.update_attributes(payment_state: "failed")
           @error = true
           @message = "There was an error processing your payment"
-          @redirect_path = checkout_state_path(@order.state)
+          @redirect_path = checkout_state_path(payment.order.state)
         end
       end
     end

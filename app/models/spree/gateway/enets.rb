@@ -23,7 +23,7 @@ module Spree
       false
     end
 
-    def purchase(amount, transaction_details, options = {})
+    def purchase(amount, source, options = {})
       ActiveMerchant::Billing::Response.new(true, 'eNETS Success', {},{})
     end
   end

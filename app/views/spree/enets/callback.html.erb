@@ -1,0 +1,15 @@
+<% if @error.present? %>
+  <p class="error">
+    <%= @message %>
+  </p>
+<% else %>
+  <h4>Waiting payment confirmation... Do not refresh the page!</h4>
+<% end %>
+
+<script>
+  $(document).ready(function(){
+    setTimeout(function(){
+      window.location.replace("<%= @redirect_path %>");
+    }, 5000);
+  })
+</script>

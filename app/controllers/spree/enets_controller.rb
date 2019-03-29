@@ -43,11 +43,9 @@ module Spree
 
       # netsTxnStatus= 0 is successfully transaction. 1 is failed.
       if response['netsTxnStatus'] == '1'
-        error_msg = response['stageRespCode'] + ': ' + response['netsTxnMsg']
-
-        flash.alert = error_msg
-        redirect_to checkout_path
-        return
+        @error = true
+        @message = response['stageRespCode'] + ': ' + response['netsTxnMsg']
+        @redirect_path = checkout_state_path(@order.state)
       end
 
       money = (@order.total.to_f*100).round
@@ -60,6 +58,8 @@ module Spree
           avs_response: response['netsTxnMsg']
         })
 
+        payment.started_processing!
+        
         # NOTE: for has_one, use payment.create_enets_transaction!; for has_many, use payment.enets_transactions.create!
         payment.create_enets_transaction!(
           nets_mid: "#{response['netsMid']}",
@@ -81,22 +81,22 @@ module Spree
           payment_id: payment.id
         )
 
-        payment.complete
-        @order.next
-
-        if @order.payment_state == "paid"
-          flash.notice = payment_method.preferred_success_message
-          redirect_to checkout_path
-          return
+        if response['netsTxnStatus'] == '0'
+          @order.next
+          @message = Spree.t(:order_processed_successfully)
+          @current_order = nil
+          flash.notice = Spree.t(:order_processed_successfully)
+          flash['order_completed'] = true
+          @error = false
+          @redirect_path = order_path(@order)
         else
-          flash.alert = payment_method.preferred_failed_message
-          redirect_to checkout_path
-          return
+          payment.state = "failed"
+          payment.save
+          @order.update_attributes(payment_state: "failed")
+          @error = true
+          @message = "There was an error processing your payment"
+          @redirect_path = checkout_state_path(@order.state)
         end
-      else
-        flash.alert = payment_method.preferred_error_message
-        redirect_to products_path
-        return
       end
     end
 

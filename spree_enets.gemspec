@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = SpreeEnets::VERSION
   spec.authors       = ["Roshan"]
   spec.email         = ["roshan@onezine.com"]
-  spec.required_ruby_version = '>= 2.5.3'
+  spec.required_ruby_version = '>= 2.5.1'
 
   spec.homepage      = "https://github.com/roshan92/spree_enets"
   spec.license       = "MIT"

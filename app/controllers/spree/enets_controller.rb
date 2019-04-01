@@ -43,8 +43,7 @@ module Spree
 
       # netsTxnStatus= 0 is successfully transaction. 1 is failed.
       if response['netsTxnStatus'] == '1'
-        @error = true
-        @message = response['stageRespCode'] + ': ' + response['netsTxnMsg']
+        flash.alert = response['stageRespCode'] + ': ' + response['netsTxnMsg']
         @redirect_path = checkout_state_path(@order.state)
       end
 
@@ -83,17 +82,14 @@ module Spree
         @order.next!
 
         if @order.complete?
-          @message = Spree.t(:order_processed_successfully)
           @current_order = nil
-          flash['order_completed'] = true
-          @error = false
+          flash.notice = Spree.t(:order_processed_successfully)
           @redirect_path = order_path(payment.order)
         else
           payment.state = "failed"
           payment.save
           @order.update_attributes(payment_state: "failed")
-          @error = true
-          @message = "There was an error processing your payment"
+          flash.alert = "There was an error processing your payment"
           @redirect_path = checkout_state_path(payment.order.state)
         end
       end

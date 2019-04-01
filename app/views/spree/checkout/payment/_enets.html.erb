@@ -14,3 +14,35 @@ Pay with <%= link_to(image_tag(payment_method.preferred_image_url, class: 'nets_
     width: 150px;
   }
 </style>
+
+<script>
+  Enets = {
+      updateSaveAndContinueVisibility: function() {
+        if (this.isButtonHidden()) {
+          $(this).trigger('hideSaveAndContinue')
+        } else {
+          $(this).trigger('showSaveAndContinue')
+        }
+      },
+      isButtonHidden: function () {
+        paymentMethod = this.checkedPaymentMethod();
+        return (!$('#use_existing_card_yes:checked').length && Enets.paymentMethodID && paymentMethod.val() == Enets.paymentMethodID);
+      },
+      checkedPaymentMethod: function() {
+        return $('div[data-hook="checkout_payment_step"] input[type="radio"][name="order[payments_attributes][][payment_method_id]"]:checked');
+      },
+      hideSaveAndContinue: function() {
+        $("#checkout_form_payment [data-hook=buttons]").hide();
+      },
+      showSaveAndContinue: function() {
+        $("#checkout_form_payment [data-hook=buttons]").show();
+      }
+    }
+    $(document).ready(function() {
+      Enets.updateSaveAndContinueVisibility();
+      paymentMethods = $('div[data-hook="checkout_payment_step"] input[type="radio"]').click(function (e) {
+        Enets.updateSaveAndContinueVisibility();
+      });
+    })
+    Enets.paymentMethodID = "<%= payment_method.id %>"
+</script>

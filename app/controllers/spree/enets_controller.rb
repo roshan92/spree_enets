@@ -11,6 +11,7 @@ module Spree
     def index
       success_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + enets_confirm_path(params[:pid]).gsub("\n",'')
       callback_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + enets_callback_path(params[:pid]).gsub("\n",'')
+      server_callback_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + enets_server_callback_path(params[:pid]).gsub("\n",'')
       cancel_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + enets_cancel_path(params[:pid]).gsub("\n",'')
 
       txn_amt = @order.total
@@ -19,6 +20,12 @@ module Spree
         @hmac = generate_signature(@txn_req, payment_method.preferred_secret_key)
         @key_id = payment_method.preferred_public_key
       end
+    end
+
+    def server_callback
+      response = JSON.parse(CGI.unescape(params[:message]))['msg']
+      hmac = params[:hmac]
+      key_id = params[:KeyId]
     end
 
     def callback
@@ -33,13 +40,14 @@ module Spree
         key_id = params[:KeyId]
       end
 
-      raise "UMID mismatch" if response['netsMid'] != payment_method.preferred_umid
       raise "Invalid Payment method" if payment_method.type != "Spree::Gateway::Enets"
 
       Spree::LogEntry.create({
         source: payment_method,
         details: params.to_yaml
       })
+
+      raise "UMID mismatch" if response['netsMid'] != payment_method.preferred_umid
 
       # netsTxnStatus= 0 is successfully transaction. 1 is failed.
       if response['netsTxnStatus'] == '1'
@@ -150,7 +158,7 @@ module Spree
       merchantTxnRef = time.inspect[0..-7].tr('-','').tr(':','') + time.usec.to_s[0..-4]
       merchantTxnDtm = time.inspect[0..-7].tr('-','') + "." + time.usec.to_s[0..-4]
 
-      txn_req = "{\"ss\":\"1\",\"msg\":{\"netsMid\":\""+umid+"\",\"tid\":\"\",\"submissionMode\":\"B\",\"txnAmount\":\""+(txnAmt.to_f*100).round.to_s+"\",\"merchantTxnRef\":\""+merchantTxnRef+"\",\"merchantTxnDtm\":\""+merchantTxnDtm+"\",\"paymentType\":\"SALE\",\"currencyCode\":\"SGD\",\"paymentMode\":\"\",\"merchantTimeZone\":\"+8:00\",\"b2sTxnEndURL\":\""+callback_url+"\",\"b2sTxnEndURLParam\":\"\",\"s2sTxnEndURL\":\"https://sit2.enets.sg/MerchantApp/rest/s2sTxnEnd\",\"s2sTxnEndURLParam\":\"\",\"clientType\":\"W\",\"supMsg\":\"\",\"netsMidIndicator\":\"U\",\"ipAddress\":\""+request.remote_ip+"\",\"language\":\"en\"}}"
+      txn_req = "{\"ss\":\"1\",\"msg\":{\"netsMid\":\""+umid+"\",\"tid\":\"\",\"submissionMode\":\"B\",\"txnAmount\":\""+(txnAmt.to_f*100).round.to_s+"\",\"merchantTxnRef\":\""+merchantTxnRef+"\",\"merchantTxnDtm\":\""+merchantTxnDtm+"\",\"paymentType\":\"SALE\",\"currencyCode\":\"SGD\",\"paymentMode\":\"\",\"merchantTimeZone\":\"+8:00\",\"b2sTxnEndURL\":\""+callback_url+"\",\"b2sTxnEndURLParam\":\"\",\"s2sTxnEndURL\":\""+server_callback_url+"\",\"s2sTxnEndURLParam\":\"\",\"clientType\":\"W\",\"supMsg\":\"\",\"netsMidIndicator\":\"U\",\"ipAddress\":\""+request.remote_ip+"\",\"language\":\"en\"}}"
 
       return txn_req
     end

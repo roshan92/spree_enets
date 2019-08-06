@@ -16,7 +16,7 @@ module Spree
 
       txn_amt = @order.total
       if (!txn_amt.nil?)
-        @txn_req = generate_payload(txn_amt, payment_method.preferred_umid, callback_url)
+        @txn_req = generate_payload(txn_amt, payment_method.preferred_umid, callback_url, server_callback_url)
         @hmac = generate_signature(@txn_req, payment_method.preferred_secret_key)
         @key_id = payment_method.preferred_public_key
       end
@@ -153,7 +153,7 @@ module Spree
       Spree::PaymentMethod.find(params[:pid])
     end
 
-    def generate_payload(txnAmt, umid, callback_url)
+    def generate_payload(txnAmt, umid, callback_url, server_callback_url)
       time = Time.new
       merchantTxnRef = time.inspect[0..-7].tr('-','').tr(':','') + time.usec.to_s[0..-4]
       merchantTxnDtm = time.inspect[0..-7].tr('-','') + "." + time.usec.to_s[0..-4]

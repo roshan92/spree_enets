@@ -23,9 +23,7 @@ module Spree
     end
 
     def server_callback
-      response = JSON.parse(CGI.unescape(params[:message]))['msg']
-      hmac = params[:hmac]
-      key_id = params[:KeyId]
+      @resp = Spree::EnetsTransaction.last
     end
 
     def callback

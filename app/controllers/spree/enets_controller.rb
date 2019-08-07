@@ -3,7 +3,7 @@ require 'openssl'
 
 module Spree
   class EnetsController < StoreController
-    before_action :load_order
+    before_action :load_order, except: [:server_callback]
     before_action :payment_method, only: [:index, :callback, :confirm]
     before_action :load_payment, only: [:cancel]
     protect_from_forgery only: :index
